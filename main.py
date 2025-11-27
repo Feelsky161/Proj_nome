@@ -1,17 +1,18 @@
 import os
 from datetime import datetime
+import colorama
+from colorama import Fore, Style
 
+# Инициализация colorama (нужно для Windows)
+colorama.init()
 
 def log_transactions(func):
     """Декоратор для логирования вызовов функции add_transaction."""
-
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
-        print(f"Лог: {func.__name__} вызвана с аргументами {args[1:]} и результатом {result}")
+        print(f"{Fore.LIGHTBLUE_EX}Лог: {func.__name__} вызвана с аргументами {args[1:]} и результатом {result}{Style.RESET_ALL}")
         return result
-
     return wrapper
-
 
 class FinanceManager:
     def __init__(self):
@@ -23,7 +24,7 @@ class FinanceManager:
     def load_data(self):
         """Загружает данные из файла при старте программы."""
         if not os.path.exists(self.filename):
-            print("Файл данных не найден. Начинаем с пустого баланса.")
+            print(f"{Fore.LIGHTBLUE_EX}Файл данных не найден. Начинаем с пустого баланса.{Style.RESET_ALL}")
             return
 
         try:
@@ -48,9 +49,9 @@ class FinanceManager:
                             "amount": float(amount),
                             "category": category
                         })
-            print("Данные успешно загружены из файла.")
+            print(f"{Fore.GREEN}Данные успешно загружены из файла.{Style.RESET_ALL}")
         except Exception as e:
-            print(f"Ошибка при загрузке данных: {e}. Начинаем с пустого баланса.")
+            print(f"{Fore.RED}Ошибка при загрузке данных: {e}. Начинаем с пустого баланса.{Style.RESET_ALL}")
 
     def save_data(self):
         """Сохраняет данные в файл."""
@@ -61,23 +62,23 @@ class FinanceManager:
                     file.write(f"rating:{self.teacher_rating}\n")
                 for transaction in self.transaction_history:
                     file.write(f"{transaction['type']},{transaction['amount']},{transaction['category']}\n")
-            print("Данные успешно сохранены в файл.")
+            print(f"{Fore.GREEN}Данные успешно сохранены в файл.{Style.RESET_ALL}")
         except Exception as e:
-            print(f"Ошибка при сохранении данных: {e}")
+            print(f"{Fore.RED}Ошибка при сохранении данных: {e}{Style.RESET_ALL}")
 
     @log_transactions
     def add_transaction(self, type, amount, category):
         """Добавляет новую транзакцию, обновляет баланс."""
         if type not in ["доход", "расход"]:
-            print("Ошибка: тип операции должен быть «доход» или «расход».")
+            print(f"{Fore.RED}Ошибка: тип операции должен быть «доход» или «расход».{Style.RESET_ALL}")
             return False
 
         if amount <= 0:
-            print("Ошибка: сумма должна быть положительной.")
+            print(f"{Fore.RED}Ошибка: сумма должна быть положительной.{Style.RESET_ALL}")
             return False
 
         if type == "расход" and amount > self.balance:
-            print("Ошибка: недостаточно средств на балансе.")
+            print(f"{Fore.RED}Ошибка: недостаточно средств на балансе.{Style.RESET_ALL}")
             return False
 
         # Обновление баланса
@@ -93,16 +94,16 @@ class FinanceManager:
             "category": category
         }
         self.transaction_history.append(transaction)
-        print(f"Транзакция добавлена: {transaction}")
+        print(f"{Fore.GREEN}Транзакция добавлена: {transaction}{Style.RESET_ALL}")
         return True
 
     def set_teacher_rating(self, rating):
         """Устанавливает оценку учителя (1–12)."""
         if not isinstance(rating, int) or rating < 1 or rating > 12:
-            print("Ошибка: оценка должна быть целым числом от 1 до 12.")
+            print(f"{Fore.RED}Ошибка: оценка должна быть целым числом от 1 до 12.{Style.RESET_ALL}")
             return False
         self.teacher_rating = rating
-        print(f"Оценка учителя установлена: {self.teacher_rating}")
+        print(f"{Fore.GREEN}Оценка учителя установлена: {self.teacher_rating}{Style.RESET_ALL}")
         return True
 
     def get_teacher_rating(self):
@@ -120,46 +121,45 @@ class FinanceManager:
     def run(self):
         """Основной цикл взаимодействия с пользователем."""
         while True:
-            print("\nМеню:")
-            print("1. Добавить доход/расход")
-            print("2. Показать баланс и транзакции")
-            print("3. Установить оценку учителя (1–12)")
-            print("4. Сохранить и выйти")
-            choice = input("Выберите действие: ").strip()
+            print(f"\n{Fore.BLUE}Меню:{Style.RESET_ALL}")
+            print(f"{Fore.BLUE}1. Добавить доход/расход{Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}2. Показать баланс и транзакции{Style.RESET_ALL}")
+            print(f"{Fore.RED}3. Установить оценку учителя (1–12){Style.RESET_ALL}")
+            print(f"{Fore.GREEN}4. Сохранить и выйти{Style.RESET_ALL}")
+            choice = input(f"{Fore.MAGENTA}Выберите действие: {Style.RESET_ALL}").strip()
 
             if choice == "1":
-                type = input("Введите тип (доход/расход): ").strip().lower()
+                type = input(f"{Fore.MAGENTA}Введите тип (доход/расход): {Style.RESET_ALL}").strip().lower()
                 try:
-                    amount = float(input("Введите сумму: "))
+                    amount = float(input(f"{Fore.MAGENTA}Введите сумму: {Style.RESET_ALL}"))
                 except ValueError:
-                    print("Ошибка: введите число!")
+                    print(f"{Fore.RED}Ошибка: введите число!{Style.RESET_ALL}")
                     continue
-                category = input("Введите категорию: ").strip()
+                category = input(f"{Fore.MAGENTA}Введите категорию: {Style.RESET_ALL}").strip()
                 self.add_transaction(type, amount, category)
 
             elif choice == "2":
-                print(f"\nТекущий баланс: {self.get_balance():.2f}")
-                print("Список транзакций:")
+                print(f"\n{Fore.YELLOW}Текущий баланс: {self.get_balance():.2f}{Style.RESET_ALL}")
+                print(f"{Fore.YELLOW}Список транзакций:{Style.RESET_ALL}")
                 for transaction in self.get_transactions():
-                    print(transaction)
+                    print(f"  {transaction}")
                 if self.get_teacher_rating() is not None:
-                    print(f"Оценка учителя: {self.get_teacher_rating()}")
+                    print(f"{Fore.YELLOW}Оценка учителя: {self.get_teacher_rating()}{Style.RESET_ALL}")
 
             elif choice == "3":
                 try:
-                    rating = int(input("Введите оценку учителя (1–12): "))
+                    rating = int(input(f"{Fore.MAGENTA}Введите оценку учителя (1–12): {Style.RESET_ALL}"))
                     self.set_teacher_rating(rating)
                 except ValueError:
-                    print("Ошибка: введите целое число!")
+                    print(f"{Fore.RED}Ошибка: введите целое число!{Style.RESET_ALL}")
 
             elif choice == "4":
                 self.save_data()
-                print("Программа завершена.")
+                print(f"{Fore.GREEN}Программа завершена.{Style.RESET_ALL}")
                 break
 
             else:
-                print("Ошибка: введите 1, 2, 3 или 4.")
-
+                print(f"{Fore.RED}Ошибка: неверный выбор. Введите 1, 2, 3 или 4.{Style.RESET_ALL}")
 
 # Блок main
 if __name__ == "__main__":
